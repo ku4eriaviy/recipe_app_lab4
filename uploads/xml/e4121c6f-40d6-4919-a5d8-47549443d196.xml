@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<recipe><name>Омлет</name><prep_time>7</prep_time><instructions>Взбить яйца, перемешать с молоком, добавить соль, вылить в сковороду</instructions><ingredients><ingredient name="Яйца" amount="3шт" /><ingredient name="Молоко" amount="150мл" /><ingredient name="Соль" amount="2г" /></ingredients></recipe>

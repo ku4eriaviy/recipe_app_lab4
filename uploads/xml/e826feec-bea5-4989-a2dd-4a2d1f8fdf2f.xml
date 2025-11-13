@@ -1,0 +1,8 @@
+<recipe>
+  <name>Тестовый файл</name>
+  <prep_time>20</prep_time>
+  <ingredients>
+    <ingredient name="Сахар" amount="100 г"/>
+  </ingredients>
+  <instructions>Смешать и подать.</instructions>
+</recipe>
