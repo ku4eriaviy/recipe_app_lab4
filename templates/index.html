@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Информация о рецептах XML</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Добавить рецепт</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="format" value="xml">Сохранить как XML</button>
+    </form>
+
+    <h2>Загрузить XML файл</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" accept=".xml" required>
+        <button type="submit">Загрузить</button>
+    </form>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2>Загруженные рецепты</h2>
+    {% if recipes %}
+        {% for recipe in recipes %}
+            <div class="recipe-card">
+                <h3>{{ recipe.name }}</h3>
+                <p><strong>Время:</strong> {{ recipe.prep_time }} мин</p>
+                <p><strong>Ингредиенты:</strong></p>
+                <ul>
+                {% for ing in recipe.ingredients %}
+                    <li>{{ ing.name }} — {{ ing.amount }}</li>
+                {% endfor %}
+                </ul>
+                <p><strong>Инструкции:</strong> {{ recipe.instructions }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Нет загруженных рецептов.</p>
+    {% endif %}
+</body>
+</html>
