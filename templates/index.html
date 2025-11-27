@@ -10,7 +10,12 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" name="format" value="xml">Сохранить как XML</button>
+        <p>
+            <strong>Сохранить:</strong><br>
+            <label><input type="radio" name="save_target" value="file" checked> В XML-файл</label><br>
+            <label><input type="radio" name="save_target" value="db"> В базу данных</label>
+        </p>
+        <input type="submit" value="Сохранить">
     </form>
 
     <h2>Загрузить XML файл</h2>
