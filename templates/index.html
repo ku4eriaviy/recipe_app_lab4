@@ -10,12 +10,7 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <p>
-            <strong>Сохранить:</strong><br>
-            <label><input type="radio" name="save_target" value="file" checked> В XML-файл</label><br>
-            <label><input type="radio" name="save_target" value="db"> В базу данных</label>
-        </p>
-        <input type="submit" value="Сохранить">
+        <button type="submit" name="format" value="xml">Сохранить как XML</button>
     </form>
 
     <h2>Загрузить XML файл</h2>
@@ -51,5 +46,34 @@
     {% else %}
         <p>Нет загруженных рецептов.</p>
     {% endif %}
+
+    {% if source == 'db' %}
+  <h3>AJAX-поиск:</h3>
+  <input type="text" id="search-input" placeholder="Поиск по названию или инструкции...">
+  <div id="search-results"></div>
+
+  <script>
+    document.getElementById('search-input').addEventListener('keyup', function() {
+      const query = this.value;
+      if (query.length < 2) {
+        document.getElementById('search-results').innerHTML = '';
+        return;
+      }
+      fetch(`/search/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          const results = data.results;
+          const html = results.map(r => `
+            <div class="recipe-card">
+              <h4>${r.name}</h4>
+              <p>Время: ${r.prep_time} мин</p>
+              <p>Инструкции: ${r.instructions}</p>
+            </div>
+          `).join('');
+          document.getElementById('search-results').innerHTML = html;
+        });
+    });
+  </script>
+{% endif %}
 </body>
 </html>
