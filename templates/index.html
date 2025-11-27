@@ -41,6 +41,10 @@
                 {% endfor %}
                 </ul>
                 <p><strong>Инструкции:</strong> {{ recipe.instructions }}</p>
+                {% if recipe.id %}
+                    <button onclick="editRecipe({{ recipe.id }})" class="btn btn-sm btn-warning">Редактировать</button>
+                    <button onclick="deleteRecipe({{ recipe.id }})" class="btn btn-sm btn-danger">Удалить</button>
+                {% endif %}
             </div>
         {% endfor %}
     {% else %}
@@ -75,5 +79,29 @@
     });
   </script>
 {% endif %}
+    <script>
+    function deleteRecipe(id) {
+        if (!confirm('Вы уверены, что хотите удалить этот рецепт?')) return;
+        fetch(`/delete/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка: ' + (data.error || 'неизвестная'));
+            }
+        });
+    }
+
+    function editRecipe(id) {
+        alert('Редактирование рецепта #' + id + ' — требует модального окна (не реализовано в базовом варианте)');
+    }
+    </script>
 </body>
 </html>

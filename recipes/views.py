@@ -11,6 +11,53 @@ import xml.etree.ElementTree as ET
 import os
 from django.http import JsonResponse
 from django.conf import settings
+from django.views.decorators.http import require_http_methods
+import json
+
+@require_http_methods(["POST"])
+def edit_recipe(request, recipe_id):
+    try:
+        recipe = Recipe.objects.get(id=recipe_id)
+        data = json.loads(request.body)
+        name = data.get('name', '').strip()
+        prep_time = data.get('prep_time')
+        instructions = data.get('instructions', '').strip()
+
+        if not name or not instructions or not prep_time:
+            return JsonResponse({'error': 'Все поля обязательны'}, status=400)
+
+        if Recipe.objects.filter(name=name).exclude(id=recipe_id).exists():
+            return JsonResponse({'error': 'Рецепт с таким названием уже существует'}, status=400)
+
+        recipe.name = name
+        recipe.prep_time = int(prep_time)
+        recipe.instructions = instructions
+        recipe.save()
+
+        # Обновляем ингредиенты (просто заменяем)
+        recipe.ingredients.all().delete()
+        ingredients = data.get('ingredients', [])
+        for ing in ingredients:
+            if ing.get('name') and ing.get('amount'):
+                Ingredient.objects.create(
+                    recipe=recipe,
+                    name=ing['name'],
+                    amount=ing['amount']
+                )
+
+        return JsonResponse({'success': True})
+    except Recipe.DoesNotExist:
+        return JsonResponse({'error': 'Рецепт не найден'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@require_http_methods(["POST"])
+def delete_recipe(request, recipe_id):
+    try:
+        Recipe.objects.get(id=recipe_id).delete()
+        return JsonResponse({'success': True})
+    except Recipe.DoesNotExist:
+        return JsonResponse({'error': 'Рецепт не найден'}, status=404)
 
 def search_recipes(request):
     query = request.GET.get('q', '')
