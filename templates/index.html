@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Информация о рецептах XML</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <h1>Добавить рецепт</h1>
@@ -11,6 +12,13 @@
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" name="format" value="xml">Сохранить как XML</button>
+    </form>
+
+    <h3>Источник данных:</h3>
+    <form method="get" style="margin:10px 0;">
+        <label><input type="radio" name="source" value="files" {% if source == 'files' %}checked{% endif %}> Из XML-файлов</label>
+        <label><input type="radio" name="source" value="db" {% if source == 'db' %}checked{% endif %}> Из базы данных</label>
+        <button type="submit">Применить</button>
     </form>
 
     <h2>Загрузить XML файл</h2>
@@ -52,56 +60,46 @@
     {% endif %}
 
     {% if source == 'db' %}
-  <h3>AJAX-поиск:</h3>
-  <input type="text" id="search-input" placeholder="Поиск по названию или инструкции...">
-  <div id="search-results"></div>
+        <h3>AJAX-поиск:</h3>
+        <input type="text" id="search-input" placeholder="Поиск по названию или инструкции...">
+        <div id="search-results"></div>
 
-  <script>
-    document.getElementById('search-input').addEventListener('keyup', function() {
-      const query = this.value;
-      if (query.length < 2) {
-        document.getElementById('search-results').innerHTML = '';
-        return;
-      }
-      fetch(`/search/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-          const results = data.results;
-          const html = results.map(r => `
-            <div class="recipe-card">
-              <h4>${r.name}</h4>
-              <p>Время: ${r.prep_time} мин</p>
-              <p>Инструкции: ${r.instructions}</p>
-            </div>
-          `).join('');
-          document.getElementById('search-results').innerHTML = html;
-        });
-    });
-  </script>
-{% endif %}
+        <script>
+            document.getElementById('search-input').addEventListener('keyup', function() {
+            const query = this.value;
+            if (query.length < 2) {
+                document.getElementById('search-results').innerHTML = '';
+                return;
+            }
+            fetch(`/search/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                const results = data.results;
+                const html = results.map(r => `
+                    <div class="recipe-card">
+                    <h4>${r.name}</h4>
+                    <p>Время: ${r.prep_time} мин</p>
+                    <p>Инструкции: ${r.instructions}</p>
+                    </div>
+                `).join('');
+                document.getElementById('search-results').innerHTML = html;
+                });
+            });
+        </script>
+    {% endif %}
     <script>
-    function deleteRecipe(id) {
-        if (!confirm('Вы уверены, что хотите удалить этот рецепт?')) return;
-        fetch(`/delete/${id}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Ошибка: ' + (data.error || 'неизвестная'));
-            }
-        });
-    }
-
-    function editRecipe(id) {
-        alert('Редактирование рецепта #' + id + ' — требует модального окна (не реализовано в базовом варианте)');
-    }
-    </script>
+function deleteRecipe(id) {
+    if (!confirm('Удалить рецепт?')) return;
+    fetch(`/delete/${id}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}', 'Accept': 'application/json'}
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Ошибка: ' + (data.error || 'неизвестная'));
+    });
+}
+</script>
 </body>
 </html>
